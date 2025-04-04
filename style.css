@@ -1,0 +1,93 @@
+html,body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    height: 60px;
+}
+
+#mapId {
+    height: calc(100vh - 60px);
+    width: 100%;
+    position: relative;
+    z-index: 0;
+}
+
+.menuInfo {
+    position: absolute;
+    top: 75px;
+    left: 75px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    display: block;
+}
+
+.layer-button {
+    width: 48px;
+    height: 48px;
+    border: 2px solid #333;
+    background-color: white;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.layer-button-inner {
+    color: #333;
+    font-size: 32px;
+    line-height: 1;
+}
+
+.layer-button.selected {
+    background-color: lightblue;
+}
+
+.layer-button:hover .layer-button-inner {
+    color: #007bff;
+}
+
+
+.polygon-label{
+    padding: 1px;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    white-space: nowrap;
+    border: 1px solid #444;
+    color: #222;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip{
+    background-color: #444;
+    color: white;
+}
+
+
+.icon-bbq .fa-circle {
+    color: saddlebrown;
+}
+.icon-bbq .fa-utensils {
+    color: navajowhite;
+}
+.icon-winery .fa-circle {
+    color: darkred;
+}
+.icon-winery .fa-wine-bottle {
+    color: lavenderblush;
+}
+.icon-brewery .fa-circle {
+    color: goldenrod;
+}
+.icon-brewery .fa-beer {
+    color: white;
+}

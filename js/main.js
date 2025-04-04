@@ -2,78 +2,198 @@ import { esriToken } from './config.js';
 
 $(document).ready(function () {
 
-    let mapFocus = L.map("mapId",{attributionControl: false}).setView([32.383449, -99.974561], 6);
-    //var esriTopoFocusLayer = L.esri.basemapLayer("Topographic", {hideLogo: "true"}).addTo(mapFocus);
+    //initialize map
+    let map = L.map("mapId",{attributionControl: false}).setView([32.383449, -99.974561], 6);
 
-    let esriTopoVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/topographic',{token: esriToken})
-    let esriLightGrayVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/light-gray',{token: esriToken})
+    //add basemap layers
+    let esriTopoVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/topographic',{token: esriToken});
+    let esriLightGrayVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/light-gray',{token: esriToken});
+    let CyclOSMBasemap = L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {maxZoom: 20});
 
     let basemaps = {
         "Topographic": esriTopoVectorBasemap,
-        "Light Gray": esriLightGrayVectorBasemap
+        "Light Gray": esriLightGrayVectorBasemap,
+        "Biking (CyclOSM)":CyclOSMBasemap
     }
 
-    mapFocus.addLayer(esriTopoVectorBasemap);
+    map.addLayer(esriTopoVectorBasemap);
+    L.control.layers(basemaps).addTo(map);
+
+    //add location control
+    L.control.locate().addTo(map);
 
 
-    L.control.layers(basemaps).addTo(mapFocus);
 
-    let bbqJoints;
-
+    //jquery for handling buttonclicking
     $('.layer-button').on('click', function () {
-        const buttonId = $(this).attr('id') || $(this).find('i').attr('id');
+        const buttonId = $(this).attr('id');
         layerButtonClicked(buttonId);
     });
 
+
+    //Active layers list
+    var layersList = {};
+    var featureGroup = new L.FeatureGroup();
+    featureGroup.addTo(map);
+
+    //set base url for geojson files
+    const baseURL =  'http://44.225.111.109/thc_data/';
+
     function layerButtonClicked(buttonId) {
         console.log('Clicked button ID:', buttonId);
-    }
 
+        //slightly different action if full extent is pressed.
+        if (buttonId === "FullExtent") {
+            if (featureGroup.getLayers().length !== 0) {
+                console.log(featureGroup.getBounds());
+                map.fitBounds(featureGroup.getBounds());
+            } else {
+                map.setView([32.383449, -99.974561], 6);
+            }
+            return
+        }
 
-    $('#BBQ').on('click', function () {
-        console.log('Hi bbq');
-        bbqClick();
-    })
+        //check to see if layer is already displaying, if so, remove, if not, send ajax request
+        if (buttonId in layersList) {
+            featureGroup.removeLayer(layersList[buttonId]);
+            delete layersList[buttonId];
+            console.log('Removed layer:', buttonId);
 
-
-    function bbqClick() {
-        console.log(bbqJoints);
-
-        if (typeof bbqJoints !== 'undefined' && mapFocus.hasLayer(bbqJoints)) {
-            console.log("Bull");
-            mapFocus.removeLayer(bbqJoints);
+            $('#' + buttonId).removeClass('selected');
         } else {
-            let url1 = 'http://44.225.111.109/thc_data/BBQ_THC.geojson';
+            $('#' + buttonId).addClass('selected');
+
+            let requesetURL = baseURL + buttonId + '_THC.geojson';
+            console.log('Requesting', requesetURL);
             $.ajax({
                 dataType: "json",
-                url: url1,
-                success: bbqLayerFunc
+                url: requesetURL,
+                success: function(data) {
+                    processGeoJSON(data, buttonId); //passing buttonID to processing function to be added to active layers list
+                },
             });
         }
     }
 
-    let faBBQ_Icon = L.divIcon({
-        html: '<span class="fa-stack">' +
-            '<i style="color: red;" class="fa fa-stack-2x fa-circle"></i>' +
-            '<i style="color: blue;" class="fas fa-utensils fa-stack-1x"></i>' +
-            '</span>',
-        iconSize: [24, 24],
-        iconAnchor: [6, 40],
-        popupAnchor: [0, -30],
-        className: 'gauge-styling'
-    });
+    //big ol function for handling drawing json layers, popups, and labels
+    function processGeoJSON(data, buttonId) {
+        console.log("Received GeoJSON:", data);
 
-    function bbqLayerFunc(dataBBQ) {
-        bbqJoints = L.geoJSON(dataBBQ, {
-            pointToLayer: function (feature, latlng) {
-                return L.marker(latlng, { icon: faBBQ_Icon });
-            }
-        })
-            .bindPopup(function (layer) {
-                return "<span class=''> BBQ Name: </span>" + layer.feature.properties.NAME;
+        let jsonLayer
+
+        const regionColors = {
+            'Brazos': '#f94144',
+            'Forest': '#f3722c',
+            'Forts': '#f8961e',
+            'Hill Country': '#f9c74f',
+            'Independence': '#90be6d',
+            'Lakes': '#43aa8b',
+            'Mountain': '#577590',
+            'Pecos': '#277da1',
+            'Plains': '#9c89b8',
+            'Tropical': '#c74496'
+        };
+
+        //add labels to polygons and polylines, generate style and popup info for all layers
+        if (buttonId === "Region" ) {
+            jsonLayer = L.geoJson(data, {
+                style: function (feature) {
+                    let fillColor = regionColors[feature.properties.REGION]
+                    return {
+                        color: '#333333',
+                        weight: 2,
+                        opacity: 1,
+                        fillColor: fillColor,
+                        fillOpacity: 0.4
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.bindTooltip(feature.properties.REGION + " Region", {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'polygon-label'
+                    });
+                }
+            }).bindPopup(function (layer) {
+                return `<span>${layer.feature.properties.REGION} THC Region</span>`;
+            });
+        } else if (buttonId === "Trail") {
+            jsonLayer = L.geoJson(data, {
+                style: function (feature) {
+                    return {
+                        color: '#265022',
+                        weight: 4,
+                        opacity: 0.8,
+                        dashArray: '6,4'
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.bindTooltip(feature.properties.TRAIL + " Trail", {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'polygon-label'
+                    });
+                }
+            }).bindPopup(function (layer) {
+                return `<span>${layer.feature.properties.TRAIL} Trail</span>`;
+            });
+        } else{
+            //if it's not a line or polygon, treat it as points
+            jsonLayer = L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    const icon = layerIcons[buttonId];
+                    return L.marker(latlng, { icon: icon });
+                }
+            }).bindPopup(function (layer) {
+                return `<span>${buttonId} Name: ${layer.feature.properties.NAME}</span>`;
             });
 
-        console.log(bbqJoints);
-        mapFocus.addLayer(bbqJoints);
+        }
+
+        //add new json layer to layergroup within map
+        featureGroup.addLayer(jsonLayer);
+        layersList[buttonId] = jsonLayer;
+        console.log("Layer group:", featureGroup);
     }
+
+
+
+    const layerIcons = {
+        BBQ: L.divIcon({
+            html: `
+            <span class="fa-stack icon-bbq">
+                <i class="fa fa-stack-2x fa-circle"></i>
+                <i class="fas fa-stack-1x fa-utensils"></i>
+            </span>
+        `,
+            iconSize: [24, 24],
+            iconAnchor: [6, 40],
+            popupAnchor: [0, -30],
+            className: 'gauge-styling'
+        }),
+        Winery: L.divIcon({
+            html: `
+            <span class="fa-stack icon-winery">
+                <i class="fa fa-stack-2x fa-circle"></i>
+                <i class="fas fa-stack-1x fa-wine-bottle"></i>
+            </span>
+        `,
+            iconSize: [24, 24],
+            iconAnchor: [6, 40],
+            popupAnchor: [0, -30],
+            className: 'gauge-styling'
+        }),
+        Brewery: L.divIcon({
+            html: `
+            <span class="fa-stack icon-brewery">
+                <i class="fa fa-stack-2x fa-circle"></i>
+                <i class="fas fa-stack-1x fa-beer"></i>
+            </span>
+        `,
+            iconSize: [24, 24],
+            iconAnchor: [6, 40],
+            popupAnchor: [0, -30],
+            className: 'gauge-styling'
+        })
+    };
 });
