@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TX Heritage Trails and Food</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+    <!-- load fontawesome from local -->
+    <link rel="stylesheet prefetch" href="vendor/fontawesome-free-5.12.1-web/css/fontawesome.min.css"/>
+    <link rel="stylesheet" href="vendor/fontawesome-free-5.12.1-web/css/solid.css"/>
+
+    <!--    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <!-- Load Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Load Esri-Leaflet -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.14/dist/esri-leaflet.js"></script>
+    <script src="https://unpkg.com/esri-leaflet-vector@4.2.8/dist/esri-leaflet-vector.js"></script>
+
+    <script src="./resources/javascripts/Leaflet.MakiMarkers.js"></script>
+    <script src="./resources/javascripts/utility.js"></script>
+
+
+    <!-- leaflet plugin for adding location service and button -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.84.1/dist/L.Control.Locate.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.84.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="info-page">
+<div class="container">
+    <h1>Texas Heritage Trails Map</h1>
+    <p>
+        This interactive map shows the <strong>Texas Heritage Trails</strong> for each <strong>Texas Historical Commission Regions</strong>, along with locations for <strong>breweries, wineries, and BBQ stands</strong>.
+    </p>
+
+    <h2>Map Controls Overview</h2>
+
+
+    <div class="icon-labels">
+        <div><i class="fas fa-2x fa-expand"></i> Full Extent: Zooms to all visible data</div>
+        <div><i class="fas fa-2x fa-map"></i> Regions: Shows THC Regions</div>
+        <div><i class="fas fa-2x fa-hiking"></i> Trails: Shows Texas Heritage Trails</div>
+        <div><i class="fas fa-2x fa-wine-bottle"></i> Wineries: Shows wineries</div>
+        <div><i class="fas fa-2x fa-beer"></i> Breweries: Shows breweries</div>
+        <div><i class="fas fa-2x fa-utensils"></i> BBQ: Shows BBQ stands</div>
+        <div><i class="fas fa-2x fa-location-arrow"></i> Location: Zooms to current location</div>
+        <div><i class="fas fa-2x fa-layer-group"></i> Basemaps: Toggles between basemap layers</div>
+    </div>
+
+    <h2>Attributions & Data Sources</h2>
+    <ul class="attribution-list">
+        <li>Mapping library: <a href="https://leafletjs.com" target="_blank">Leaflet</a></li>
+        <li>Basemaps layers: <a href="https://developers.arcgis.com/esri-leaflet/" target="_blank">Esri-Leaflet</a></li>
+        <li>Basemaps layers: <a href="https://www.cyclosm.org/" target="_blank">CyclOSM</a></li>
+        <li>User location control: <a href="https://github.com/domoritz/leaflet-locatecontrol" target="_blank">Leaflet LocateControl</a></li>
+        <li>Icons: <a href="https://fontawesome.com/icons" target="_blank">Font Awesome</a></li>
+        <li>Wineries dataset: <a href="https://texasuncorked.com" target="_blank">Texas Uncorked</a></li>
+        <li>Breweries dataset: Andrew Schwab</li>
+        <li>BBQ stands dataset: BBQ Snob Map</li>
+        <li>THC Region and trail data: <a href="https://thc.texas.gov/preserve/tourism-and-economic-development/texas-heritage-trails" target="_blank">Texas Historical Commission (THC)</a></li>
+    </ul>
+</div>
+</body>
+</html>
