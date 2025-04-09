@@ -33,7 +33,7 @@ header {
     display: block;
 }
 
-.layer-button {
+.layer-button,.leaflet-control-layers-toggle{
     width: 48px;
     height: 48px;
     border: 2px solid #333;
@@ -58,6 +58,10 @@ header {
     color: #007bff;
 }
 
+.layer-button:active {
+    background-color: lightblue;
+    transform: scale(0.95);
+}
 
 .polygon-label{
     padding: 1px;
@@ -167,8 +171,8 @@ a:hover {
 .modal-content {
     border-radius: 8px;
     max-width: 900px;
-    width: 95%;
-    height: 90vh;
+    width: 80%;
+    height: 80vh;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -192,8 +196,67 @@ a:hover {
 }
 
 
-#menuIcon {
+#menuButton {
+    width: 2rem;
+    height: 2rem;
     display: block;
     float: left;
+}
 
+.sidebar {
+    width: 0;
+    overflow-x: hidden;
+    transition: .5s;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    padding-top: 60px;
+}
+
+.sidebar.open {
+    width: 250px;
+}
+
+#main, #menuInfo {
+    transition: margin-left .5s;
+}
+
+.shifted {
+    margin-left: 250px;
+}
+
+
+
+.sidebar a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    color: #f1f1f1;
+}
+
+.sidebar .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.openbtn {
+    width: 2rem;
+    height: 2rem;
+    display: block;
+    float: left;
+}
+
+.openbtn:hover {
+    background-color: #444;
 }

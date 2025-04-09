@@ -1,9 +1,11 @@
-import { esriToken } from './config.js';
+let map;
+let featureGroup;
+let layersList = {};
 
 $(document).ready(function () {
 
     //initialize map
-    let map = L.map("mapId",{attributionControl: false}).setView([32.383449, -99.974561], 6);
+    map = L.map("mapId",{attributionControl: false}).setView([32.383449, -99.974561], 6);
 
     //add basemap layers
     let esriTopoVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/topographic',{token: esriToken});
@@ -22,57 +24,76 @@ $(document).ready(function () {
     //add location control
     L.control.locate().addTo(map);
 
-
-
-    //jquery for handling buttonclicking
-    $('.layer-button').on('click', function () {
-        const buttonId = $(this).attr('id');
-        layerButtonClicked(buttonId);
-    });
-
-
-    //Active layers list
-    var layersList = {};
-    var featureGroup = new L.FeatureGroup();
+    featureGroup = new L.FeatureGroup();
     featureGroup.addTo(map);
 
-    //set base url for geojson files
-    const baseURL =  'http://44.225.111.109/thc_data/';
+
+    //jquery for handling button-clicking
+    $('.layer-button').on('click', function () {
+        layerButtonClicked(this.id);
+    });
+
+    $('.menu-button').on('click', function () {
+        menuButtonClicked(this.id);
+    });
+
+    function fullExtent() {
+        //slightly different action if full extent is pressed
+        if (featureGroup.getLayers().length) {
+            map.fitBounds(featureGroup.getBounds());
+        } else {
+            map.setView([32.383449, -99.974561], 6);
+        }
+    }
+
+    function clearMap(){
+        featureGroup.clearLayers();
+        layersList = {};
+        $('.layer-button').removeClass('selected')
+    }
+
+    function menuButtonClicked(buttonId){
+        if (buttonId === "menu-clear"){
+            clearMap();
+        } else if (buttonId === "menu-fullExtent"){
+            fullExtent();
+        } else if (buttonId === "menu-help"){
+            toggleSidebar();
+            openInfoModal();
+        } else if (buttonId === "menu-close"){
+            toggleSidebar();
+        }
+    }
 
     function layerButtonClicked(buttonId) {
         console.log('Clicked button ID:', buttonId);
 
-        //slightly different action if full extent is pressed.
         if (buttonId === "FullExtent") {
-            if (featureGroup.getLayers().length !== 0) {
-                console.log(featureGroup.getBounds());
-                map.fitBounds(featureGroup.getBounds());
-            } else {
-                map.setView([32.383449, -99.974561], 6);
-            }
-            return
-        }
-
-        //check to see if layer is already displaying, if so, remove, if not, send ajax request
-        if (buttonId in layersList) {
-            featureGroup.removeLayer(layersList[buttonId]);
-            delete layersList[buttonId];
-            console.log('Removed layer:', buttonId);
-
-            $('#' + buttonId).removeClass('selected');
+            fullExtent();
         } else {
-            $('#' + buttonId).addClass('selected');
 
-            let requesetURL = baseURL + buttonId + '_THC.geojson';
-            console.log('Requesting', requesetURL);
-            $.ajax({
-                dataType: "json",
-                url: requesetURL,
-                success: function(data) {
-                    processGeoJSON(data, buttonId); //passing buttonID to processing function to be added to active layers list
-                },
-            });
+            //check to see if layer is already displaying, if so, remove, if not, send ajax request
+            if (buttonId in layersList) {
+                featureGroup.removeLayer(layersList[buttonId]);
+                delete layersList[buttonId];
+                console.log('Removed layer:', buttonId);
+
+                $('#' + buttonId).removeClass('selected');
+            } else {
+                $('#' + buttonId).addClass('selected');
+
+                let requesetURL = baseURL + buttonId + '_THC.geojson';
+                console.log('Requesting', requesetURL);
+                $.ajax({
+                    dataType: "json",
+                    url: requesetURL,
+                    success: function(data) {
+                        processGeoJSON(data, buttonId); //passing buttonID to processing function to be added to active layers list
+                    },
+                });
+            }
         }
+
     }
 
     //big ol function for handling drawing json layers, popups, and labels
@@ -119,7 +140,7 @@ $(document).ready(function () {
             });
         } else if (buttonId === "Trail") {
             jsonLayer = L.geoJson(data, {
-                style: function (feature) {
+                style: function () {
                     return {
                         color: '#265022',
                         weight: 4,
@@ -167,8 +188,8 @@ $(document).ready(function () {
             </span>
         `,
             iconSize: [24, 24],
-            iconAnchor: [6, 40],
-            popupAnchor: [0, -30],
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12],
             className: 'gauge-styling'
         }),
         Winery: L.divIcon({
@@ -179,8 +200,8 @@ $(document).ready(function () {
             </span>
         `,
             iconSize: [24, 24],
-            iconAnchor: [6, 40],
-            popupAnchor: [0, -30],
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12],
             className: 'gauge-styling'
         }),
         Brewery: L.divIcon({
@@ -191,10 +212,49 @@ $(document).ready(function () {
             </span>
         `,
             iconSize: [24, 24],
-            iconAnchor: [6, 40],
-            popupAnchor: [0, -30],
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12],
             className: 'gauge-styling'
         })
     };
 
 });
+
+function toggleSidebar() {
+    let sidebar = document.getElementById("mySidebar");
+    let main = document.getElementById("main");
+    let menuInfo = document.getElementById("menuInfo");
+
+    sidebar.classList.toggle("open");
+    main.classList.toggle("shifted");
+    menuInfo.classList.toggle("shifted");
+}
+
+
+function setModalCookie() {
+    document.cookie = "infoModalShown=true; path=/; max-age=2592000"
+}
+
+function hasSeenModal() {
+    let cookies = document.cookie.split(';');
+    for (let cookie of cookies){
+        if(cookie.trim().startsWith("infoModalShown=true")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function closeInfoModal() {
+    document.getElementById('infoModal').style.display = 'none';
+    setModalCookie();
+}
+
+function openInfoModal() {
+    document.getElementById('infoModal').style.display = 'flex';
+}
+
+if (!hasSeenModal()) {
+    document.getElementById('infoModal').style.display = 'flex';
+}
+
