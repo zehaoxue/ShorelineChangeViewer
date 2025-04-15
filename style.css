@@ -13,7 +13,7 @@ header {
     text-align: center;
     font-size: 1.5rem;
     height: 60px;
-    font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+    align-content: center;
 }
 
 #mapId {
@@ -23,240 +23,223 @@ header {
     z-index: 0;
 }
 
-.menuInfo {
-    position: absolute;
-    top: 75px;
-    left: 75px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    display: block;
-}
-
-.layer-button,.leaflet-control-layers-toggle{
-    width: 48px;
-    height: 48px;
-    border: 2px solid #333;
-    background-color: white;
-    align-items: center;
-    padding: 0;
-    box-sizing: border-box;
-    border-radius: 4px;
-}
-
-.layer-button-inner {
-    color: #333;
-    font-size: 32px;
-    line-height: 1;
-}
-
-.layer-button.selected {
-    background-color: lightblue;
-}
-
-.layer-button:hover .layer-button-inner {
-    color: #007bff;
-}
-
-.layer-button:active {
-    background-color: lightblue;
-    transform: scale(0.95);
-}
-
-.polygon-label{
-    padding: 1px;
-    position: absolute;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 3px;
-    white-space: nowrap;
-    border: 1px solid #444;
-    color: #222;
-}
-
-.leaflet-popup-content-wrapper, .leaflet-popup-tip{
-    background-color: #444;
-    color: white;
+.custom-marker .circle-marker {
+    width: 10px;
+    height: 10px;
+    background-color: #007BFF;
+    border: 1px solid #000;
+    border-radius: 50%;
+    opacity: 0.8;
 }
 
 
-.icon-bbq .fa-circle {
-    color: saddlebrown;
-}
-.icon-bbq .fa-utensils {
-    color: navajowhite;
-}
-.icon-winery .fa-circle {
-    color: darkred;
-}
-.icon-winery .fa-wine-bottle {
-    color: lavenderblush;
-}
-.icon-brewery .fa-circle {
-    color: goldenrod;
-}
-.icon-brewery .fa-beer {
-    color: white;
-}
+/*!*Layer control menu and buttons*!*/
+/*.menuInfo {*/
+/*    position: absolute;*/
+/*    top: 75px;*/
+/*    left: 75px;*/
+/*    z-index: 1000;*/
+/*    background: rgba(255, 255, 255, 0.8);*/
+/*    padding: 10px;*/
+/*    display: block;*/
+/*}*/
+/*.layer-button,.leaflet-control-layers-toggle{*/
+/*    width: 48px;*/
+/*    height: 48px;*/
+/*    border: 2px solid #333;*/
+/*    background-color: white;*/
+/*    align-items: center;*/
+/*    padding: 0;*/
+/*    box-sizing: border-box;*/
+/*    border-radius: 4px;*/
+/*}*/
+/*.layer-button.selected {*/
+/*    background-color: lightblue;*/
+/*}*/
+/*.layer-button:hover .layer-button-inner {*/
+/*    color: #007bff;*/
+/*}*/
+/*.layer-button:active {*/
+/*    background-color: lightblue;*/
+/*    transform: scale(0.95);*/
+/*}*/
+/*.layer-button-inner {*/
+/*    color: #333;*/
+/*    font-size: 32px;*/
+/*    line-height: 1;*/
+/*}*/
+
+/*.polygon-label{*/
+/*    padding: 1px;*/
+/*    position: absolute;*/
+/*    background: rgba(255, 255, 255, 0.9);*/
+/*    border-radius: 3px;*/
+/*    white-space: nowrap;*/
+/*    border: 1px solid #444;*/
+/*    color: #222;*/
+/*}*/
+
+/*.leaflet-popup-content-wrapper, .leaflet-popup-tip{*/
+/*    background-color: #444;*/
+/*    color: white;*/
+/*}*/
+
+/*.icon-bbq .fa-circle {*/
+/*    color: saddlebrown;*/
+/*}*/
+/*.icon-bbq .fa-utensils {*/
+/*    color: navajowhite;*/
+/*}*/
+/*.icon-winery .fa-circle {*/
+/*    color: darkred;*/
+/*}*/
+/*.icon-winery .fa-wine-bottle {*/
+/*    color: lavenderblush;*/
+/*}*/
+/*.icon-brewery .fa-circle {*/
+/*    color: goldenrod;*/
+/*}*/
+/*.icon-brewery .fa-beer {*/
+/*    color: white;*/
+/*}*/
+
+/*!*info page*!*/
+/*.info-page{*/
+/*    padding: 2rem;*/
+/*    margin: 0;*/
+/*    background-color: #f9f9f9;*/
+/*    color: #333;*/
+/*    line-height: 1.6;*/
+/*    overflow: auto;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*.info-page .container h1 {*/
+/*    margin-top: 0;*/
+/*}*/
+/*.info-page .container h2 {*/
+/*    margin-top: 8px;*/
+/*    margin-bottom: 8px;*/
+/*}*/
+/*.info-page .container p,ul {*/
+/*    margin: 0;*/
+/*}*/
+
+/*.icon-labels div {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    margin-top: 0.5rem;*/
+/*    margin-left: 9px;*/
+/*}*/
+/*.icon-labels i {*/
+/*    min-width: 2rem;*/
+/*    min-height: 2rem;*/
+/*    display: flex;*/
+/*    color: #333;*/
+/*    border: 2px solid #333;*/
+/*    border-radius: 4px;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    font-size: 1.3rem;*/
+/*    margin-right: 1rem;*/
+/*}*/
+/*.attribution-list li {*/
+/*    line-height: 1.3;*/
+/*}*/
 
 
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}
+/*!*modal display for info page*!*/
+/*.modal-background {*/
+/*    position: fixed;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    background: rgba(0,0,0,0.5);*/
+/*    display: none;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    z-index: 9999;*/
+/*}*/
 
-.info-page{
-    font-family: "Segoe UI", "Helvetica Neue", sans-serif;
-    padding: 2rem;
-    margin: 0;
-    background-color: #f9f9f9;
-    color: #333;
-    line-height: 1.6;
-    overflow: auto;
-    box-sizing: border-box;
-}
+/*.modal-content {*/
+/*    border-radius: 8px;*/
+/*    max-width: 900px;*/
+/*    width: 80%;*/
+/*    height: 80vh;*/
+/*}*/
 
-.info-page .container h1 {
-    margin-top: 0;
-}
-.info-page .container h2 {
-    margin-top: 8px;
-    margin-bottom: 8px;
-}
-.info-page .container p,ul {
-    margin: 0;
-}
+/*.modal-close {*/
+/*    position: absolute;*/
+/*    top: 10px;*/
+/*    right: 14px;*/
+/*    font-size: 36px;*/
+/*    background: none;*/
+/*    border: none;*/
+/*}*/
 
-.icon-labels div {
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-    margin-left: 9px;
-}
-.icon-labels i {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    color: #333;
-    border: 2px solid #333;
-    border-radius: 4px;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    margin-right: 1rem;
-}
-.attribution-list li {
-    line-height: 1.3;
-}
+/*.modal-iframe {*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    overflow: auto;*/
+/*}*/
 
 
+/*!*for sidebar menu*!*/
+/*.openbtn {*/
+/*    width: 2rem;*/
+/*    height: 2rem;*/
+/*    display: flex;*/
+/*    float: left;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*}*/
+/*.openbtn:hover {*/
+/*    background-color: #444;*/
+/*}*/
 
+/*.closebtn {*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    right: 25px;*/
+/*    font-size: 36px;*/
+/*}*/
 
-.modal-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
+/*.sidebar {*/
+/*    width: 0;*/
+/*    overflow-x: hidden;*/
+/*    transition: .5s;*/
+/*    height: 100%;*/
+/*    position: fixed;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    background-color: #222;*/
+/*    padding-top: 60px;*/
+/*}*/
 
+/*.sidebar.open {*/
+/*    width: 250px;*/
+/*}*/
+/*.shifted {*/
+/*    margin-left: 250px;*/
+/*}*/
 
-.modal-content {
-    border-radius: 8px;
-    max-width: 900px;
-    width: 80%;
-    height: 80vh;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
+/*#main, #menuInfo {*/
+/*    transition: .5s;*/
+/*}*/
 
-.modal-close {
-    position: absolute;
-    top: 10px;
-    right: 14px;
-    font-size: 36px;
-    background: none;
-    border: none;
-}
-
-
-.modal-iframe {
-    border: none;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-}
-
-
-#menuButton {
-    width: 2rem;
-    height: 2rem;
-    display: block;
-    float: left;
-}
-
-.sidebar {
-    width: 0;
-    overflow-x: hidden;
-    transition: .5s;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #111;
-    padding-top: 60px;
-}
-
-.sidebar.open {
-    width: 250px;
-}
-
-#main, #menuInfo {
-    transition: margin-left .5s;
-}
-
-.shifted {
-    margin-left: 250px;
-}
+/*.sidebar a {*/
+/*    padding-left: 1.5rem;*/
+/*    margin: 0.5rem;*/
+/*    display: block;*/
+/*    color: #BBB;*/
+/*    font-size: 1.5rem;*/
+/*    text-decoration: none;*/
+/*}*/
+/*.sidebar a:hover {*/
+/*    color: white;*/
+/*}*/
 
 
 
-.sidebar a {
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 25px;
-    color: #818181;
-    display: block;
-    transition: 0.3s;
-}
 
-.sidebar a:hover {
-    color: #f1f1f1;
-}
-
-.sidebar .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-}
-
-.openbtn {
-    width: 2rem;
-    height: 2rem;
-    display: block;
-    float: left;
-}
-
-.openbtn:hover {
-    background-color: #444;
-}
