@@ -94,9 +94,10 @@ const UrlParams = {
     }
 };
 
-const map = initializeMap("mapId", esriToken);
+const map = initializeMap("mapId");
 
-function initializeMap(mapId, esriToken) {
+function initializeMap(mapId) {
+
     const {center, zoom} = UrlParams.getMapView();
     const map = L.map(mapId, {
         attributionControl: false,
@@ -172,7 +173,7 @@ function initializeMap(mapId, esriToken) {
     fullExtentButton.addTo(map);
 
     const resetButton = createLeafletButton({
-        title: 'Reset view',
+        title: 'Clear layers',
         iconHTML: '<i class="fas fa-eraser text-dark"></i>',
         clickHandler: clearMap
     });
@@ -194,33 +195,80 @@ function initializeMap(mapId, esriToken) {
     });
     infoButton.addTo(map);
 
+    function fullExtent() {
+        //slightly different action if full extent is pressed
+        if (featureGroup.getLayers().length) {
+            map.fitBounds(featureGroup.getBounds());
+        } else {
+            map.setView([38.1863, -74.8773], 7);
+        }
+    }
+
+    function clearMap() {
+        featureGroup.clearLayers();
+        layersList = {};
+        activeButtonSet.clear();
+        $('.layer-button').removeClass('selected')
+        fullExtent()
+    }
+
+    const controls = document.querySelectorAll('.leaflet-control [title]');
+
+    controls.forEach(button => {
+        let tooltip;
+
+        button.addEventListener('mouseenter', () => {
+            const title = button.getAttribute('title');
+            if (!title) return;
+
+            // Prevent default browser tooltip
+            button.dataset.title = title;
+            button.removeAttribute('title');
+
+            tooltip = document.createElement('div');
+            tooltip.className = 'custom-tooltip';
+            tooltip.innerText = title;
+            document.body.appendChild(tooltip);
+
+            // Wait for tooltip to render before measuring
+            requestAnimationFrame(() => {
+                const rect = button.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+
+                let left = rect.left - tooltipRect.width - 6;
+                if (left < 0) {
+                    // fallback if too far left
+                    left = rect.right + 6;
+                }
+
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${rect.top + window.scrollY + (rect.height - tooltipRect.height) / 2}px`;
+                tooltip.style.opacity = '1';
+            });
+        });
+
+        button.addEventListener('mouseleave', () => {
+            if (tooltip) {
+                tooltip.remove();
+                tooltip = null;
+            }
+
+            // Restore the original title
+            if (button.dataset.title) {
+                button.setAttribute('title', button.dataset.title);
+                delete button.dataset.title;
+            }
+        });
+    });
+
 
     return map;
 }
 
-
 let layersList = {};
+let activeButtonSet = new Set;
 let featureGroup = new L.FeatureGroup();
 featureGroup.addTo(map);
-let activeButtonSet = new Set;
-
-
-function fullExtent() {
-    //slightly different action if full extent is pressed
-    if (featureGroup.getLayers().length) {
-        map.fitBounds(featureGroup.getBounds());
-    } else {
-        map.setView([38.1863, -74.8773], 7);
-    }
-}
-
-function clearMap() {
-    featureGroup.clearLayers();
-    layersList = {};
-    activeButtonSet.clear();
-    $('.layer-button').removeClass('selected')
-    fullExtent()
-}
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -343,114 +391,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    const controls = document.querySelectorAll('.leaflet-control a[title]');
 
-    controls.forEach(button => {
-        let tooltip;
-
-        button.addEventListener('mouseenter', () => {
-            const title = button.getAttribute('title');
-            if (!title) return;
-
-            // Prevent default browser tooltip
-            button.dataset.title = title;
-            button.removeAttribute('title');
-
-            tooltip = document.createElement('div');
-            tooltip.className = 'custom-tooltip';
-            tooltip.innerText = title;
-            document.body.appendChild(tooltip);
-
-            // Wait for tooltip to render before measuring
-            requestAnimationFrame(() => {
-                const rect = button.getBoundingClientRect();
-                const tooltipRect = tooltip.getBoundingClientRect();
-
-                let left = rect.left - tooltipRect.width - 6;
-                if (left < 0) {
-                    // fallback if too far left
-                    left = rect.right + 6;
-                }
-
-                tooltip.style.left = `${left}px`;
-                tooltip.style.top = `${rect.top + window.scrollY + (rect.height - tooltipRect.height) / 2}px`;
-                tooltip.style.opacity = '1';
-            });
-        });
-
-        button.addEventListener('mouseleave', () => {
-            if (tooltip) {
-                tooltip.remove();
-                tooltip = null;
-            }
-
-            // Restore the original title
-            if (button.dataset.title) {
-                button.setAttribute('title', button.dataset.title);
-                delete button.dataset.title;
-            }
-        });
+    map.on('moveend', function () {
+        UrlParams.update(map);
     });
 
-
-});
-
-
-//
-// function getMapViewFromUrl() {
-//     const params = new URLSearchParams(window.location.search);
-//     const lat = parseFloat(params.get('lat'));
-//     const lng = parseFloat(params.get('lng'));
-//     const zoom = parseInt(params.get('zoom'), 10);
-//
-//     if (
-//         !isNaN(lat) &&
-//         !isNaN(lng) &&
-//         !isNaN(zoom) &&
-//         lat >= -90 && lat <= 90 &&
-//         lng >= -180 && lng <= 180 &&
-//         zoom >= 0 && zoom <= 19
-//     ) {
-//         return {center: [lat, lng], zoom};
-//     }
-//     return default_view;
-// }
-//
-// function getLayersFromUrl() {
-//     let params = new URLSearchParams(window.location.search);
-//     let layers = params.get('layers');
-//     if (layers) {
-//         // If the parameter exists, split it into a list
-//         layers = layers.split(",");  // ["shorelines", "ratesST"]
-//     } else {
-//         // If not present in the URL, just use an empty list
-//         layers = [];
-//     }
-//     console.log(layers);
-//     return layers
-// }
-//
-//
-// function updateUrlParams(map) {
-//     const center = map.getCenter();
-//     const zoom = map.getZoom();
-//
-//     const params = new URLSearchParams(window.location.search);
-//     params.set('lat', center.lat.toFixed(5));
-//     params.set('lng', ((center.lng % 360 + 540) % 360 - 180).toFixed(5));
-//     params.set('zoom', zoom);
-//
-//     if (activeButtonSet && activeButtonSet.size > 0) {
-//         params.set('layers', [...activeButtonSet].join(','));
-//     } else {
-//         params.delete('layers'); // optional: clean up empty state
-//     }
-//
-//     const newUrl = `${window.location.pathname}?${params.toString()}`;
-//     window.history.replaceState({}, '', newUrl);
-// }
-
-
-map.on('moveend', function () {
-    UrlParams.update(map);
 });
