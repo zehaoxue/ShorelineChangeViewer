@@ -3,11 +3,11 @@ html,body {
     padding: 0;
     height: 100%;
     overflow: hidden;
-    font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+    font-family: "Roboto", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
 header {
-    background-color: #333;
+    background-color: #00304d;
     color: white;
     padding: 0.5rem;
     text-align: center;
@@ -23,13 +23,232 @@ header {
     z-index: 0;
 }
 
-.custom-marker .circle-marker {
-    width: 10px;
-    height: 10px;
-    background-color: #007BFF;
-    border: 1px solid #000;
-    border-radius: 50%;
-    opacity: 0.8;
+
+/*Layer control menu and buttons*/
+.menuInfo {
+    position: absolute;
+    top: 75px;
+    left: 15px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;  /* 🔑 Stack children vertically */
+    gap: 8px;
+}
+
+.layer-button {
+    height: 48px;
+    padding: 0 12px;
+    border: 2px solid #333;
+    background-color: white;
+    border-radius: 4px;
+    font-size: Large;
+    font-weight:600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.layer-button.selected {
+    background-color: lightblue;
+}
+
+.layer-button:hover {
+    color: #007bff;
+    cursor: pointer;
+}
+
+.layer-button:active {
+    background-color: lightblue;
+    transform: scale(0.95);
+}
+
+.leaflet-style-button-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: Large;
+}
+
+.custom-tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+
+.layer-panel {
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 5px;
+    max-width: 200px;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+
+.layer-panel ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.layer-panel li {
+    padding: 4px 0;
+    border-bottom: 1px solid #eee;
+}
+
+
+
+
+/*info page*/
+.info-page{
+    padding: 2rem;
+    margin: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+.info-page .container h1 {
+    margin-top: 0;
+}
+.info-page .container h2 {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+.info-page .container p,ul {
+    margin: 0;
+}
+
+.icon-labels div {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    margin-left: 9px;
+}
+.icon-labels i {
+    min-width: 2rem;
+    min-height: 2rem;
+    display: flex;
+    color: #333;
+    border: 2px solid #333;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-right: 1rem;
+}
+.attribution-list li {
+    line-height: 1.3;
+}
+
+
+/*modal display for info page*/
+.modal-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    border-radius: 8px;
+    max-width: 900px;
+    width: 80%;
+    height: 80vh;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 36px;
+    background: none;
+    border: none;
+}
+
+.modal-iframe {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+
+/*for sidebar menu*/
+.openbtn {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    float: left;
+    justify-content: center;
+    align-items: center;
+}
+.openbtn:hover {
+    background-color: #444;
+}
+
+.closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+}
+
+.sidebar {
+    width: 0;
+    overflow-x: hidden;
+    transition: .5s;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #222;
+    padding-top: 60px;
+}
+
+.sidebar.open {
+    width: 250px;
+}
+.shifted {
+    margin-left: 250px;
+}
+
+#main, #menuInfo {
+    transition: .5s;
+}
+
+.sidebar a {
+    padding-left: 1.5rem;
+    margin: 0.5rem;
+    display: block;
+    color: #BBB;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+.sidebar a:hover {
+    color: white;
 }
 
 
