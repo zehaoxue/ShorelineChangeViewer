@@ -11,13 +11,6 @@ const ratesSTFolder = baseURL + 'ratesST/';
 const shorelinesFolder = baseURL + 'shorelines/';
 
 
-const folderNames = [
-    "baseline",
-    "intersectsLT",
-    "intersectsST",
-    "ratesLT",
-    "ratesST",
-    "shorelines"];
 
 let default_view = {
     center: [38.1863, -74.8773],
@@ -176,14 +169,6 @@ document.addEventListener('DOMContentLoaded', function () {
         layerButtonClicked(buttonId);
     })
 
-
-
-    function clearMap(){
-        featureGroup.clearLayers();
-        layersList = {};
-        $('.layer-button').removeClass('selected')
-    }
-
     // //TODO
     // function menuButtonClicked(buttonId){
     //     if (buttonId === "menu-clear"){
@@ -204,51 +189,51 @@ document.addEventListener('DOMContentLoaded', function () {
         loadGeoJSONFromDirectory(requestFolderURL, buttonId);
     }
 
-
     async function loadGeoJSONFromDirectory(requestFolderURL, buttonId) {
+        showSpinner(); // Show spinner before loading
 
-        // load folder html page
-        console.log('Requesting folder:', requestFolderURL);
-        const response = await fetch(requestFolderURL);
-        if (!response.ok) throw new Error("Failed to load directory HTML:" + response.status);
+        try {
+            const response = await fetch(requestFolderURL);
+            if (!response.ok) throw new Error("Failed to load directory HTML:" + response.status);
 
-        const htmlText = await response.text();
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(htmlText, "text/html");
 
+            const nodeList = htmlDoc.querySelectorAll("a");
+            const links = Array.from(nodeList);
+            const geojsonFiles = links
+                .map(link => link.getAttribute("href"))
+                .filter(href => href && href.toLowerCase().endsWith(".geojson"))
+                .map(href => href.split("/").pop());
 
-        // find <a> tags and get .geojson files
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(htmlText, "text/html");
+            for (const fileName of geojsonFiles) {
+                const fullURL = requestFolderURL + fileName;
 
-        const nodeList = htmlDoc.querySelectorAll("a");
-        const links = Array.from(nodeList);
-        const geojsonFiles = links
-            .map(link => link.getAttribute("href"))
-            .filter(href => href && href.toLowerCase().endsWith(".geojson"))
-            .map(href => href.split("/").pop());
+                if (fullURL in layersList) {
+                    featureGroup.removeLayer(layersList[fullURL]);
+                    delete layersList[fullURL];
+                    buttonIdSet.delete(buttonId);
+                    updateUrlParams(map);
+                    $('#' + buttonId).removeClass('selected');
+                } else {
+                    $('#' + buttonId).addClass('selected');
 
-        // request each .geojson file and add to map
-        for (const fileName of geojsonFiles) {
-            const fullURL = requestFolderURL + fileName
+                    const geojsonResponse = await fetch(fullURL);
+                    if (!geojsonResponse.ok) throw new Error("Failed to load" + fullURL + " : " + geojsonResponse.status);
 
-            if (fullURL in layersList) {
-                featureGroup.removeLayer(layersList[fullURL]);
-                delete layersList[fullURL];
-                buttonIdSet.delete(buttonId);
-                updateUrlParams(map);
-                $('#' + buttonId).removeClass('selected');
-            } else {
-                $('#' + buttonId).addClass('selected');
-
-                const geojsonResponse = await fetch(fullURL);
-                if (!geojsonResponse.ok) throw new Error("Failed to load" + fullURL + " : " + geojsonResponse.status);
-
-                const data = await geojsonResponse.json();
-                console.log(fileName)
-                processGeoJSONVectorTile(data, buttonId, fullURL)
+                    const data = await geojsonResponse.json();
+                    processGeoJSONVectorTile(data, buttonId, fullURL);
+                }
             }
+        } catch (error) {
+            console.error(error);
+            alert("Error loading GeoJSON data.");
+        } finally {
+            hideSpinner();
         }
-
     }
+
 
 
     function processGeoJSONVectorTile(data, buttonId, fullURL){
@@ -274,8 +259,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     fillOpacity: 0.8
                 });
             }
-        }).bindPopup(function (layer) {
-            return `${buttonId} Name: ${fullURL}`;
+        }).bindPopup(layer => {
+            const props = layer.feature.properties;
+            return Object.entries(props).map(([k, v]) => `<strong>${k}:</strong> ${v}`).join("<br>");
         });
 
 
@@ -439,3 +425,10 @@ function updateUrlParams(map) {
 map.on('moveend', function () {
     updateUrlParams(map);
 });
+
+function showSpinner() {
+    document.getElementById("loadingSpinner").classList.remove("hidden");
+}
+function hideSpinner() {
+    document.getElementById("loadingSpinner").classList.add("hidden");
+}
