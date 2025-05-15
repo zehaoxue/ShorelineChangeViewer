@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TX Heritage Trails and Food</title>
+    <title>National Shoreline Change Viewer Info Page</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 
     <!-- load fontawesome from local -->
@@ -39,26 +39,28 @@
     <h5>Map Controls Overview</h5>
 
     <div class="icon-labels">
-        <div><i class="fas fa-expand text-dark"></i> Location: Zooms to current location</div>
-        <div><i class="fas fa-eraser text-dark"></i> Basemaps: Toggles between basemap layers</div>
-        <div><i class="fas fa-table text-dark"></i> Menu: Opens menu containing additional options</div>
-        <div><i class="fas fa-question-circle text-dark"></i> Menu: Opens menu containing additional options</div>
+        <div><i class="fas fa-expand text-dark"></i> Full Extent: Zooms to all visible data</div>
+        <div><i class="fas fa-eraser text-dark"></i> Clear Layers: Erases all active layers, and zoom to default extent</div>
+        <div><i class="fas fa-chart-pie text-dark"></i> Graph Menu: Opens graph panel</div>
+        <div><i class="fas fa-question-circle text-dark"></i> Info Menu: Opens this info screen</div>
 
     </div>
 
     <h5>Data Sources</h5>
+    <ul class="attribution-list">
+        <li>USGS National Shoreline Change — A GIS compilation of vector shorelines and associated shoreline change data for coastal Virginia from the 1840s to 2010s <br><a href="https://www.sciencebase.gov/catalog/item/641b186fd34e4c337f0c1de3" target="_blank">https://www.sciencebase.gov/catalog/item/641b186fd34e4c337f0c1de3</a></li>
+        <li>USGS National Shoreline Change - A GIS compilation of new lidar-derived shorelines (2010, 2017, and 2018) and associated shoreline change data for coastal South Carolina <br><a href="https://www.sciencebase.gov/catalog/item/6480a887d34eac007b5793e9" target="_blank">https://www.sciencebase.gov/catalog/item/6480a887d34eac007b5793e9</a></li>
+
+    </ul>
+
+    <h5>Attributions</h5>
     <ul class="attribution-list">
         <li>Mapping library: <a href="https://leafletjs.com" target="_blank">Leaflet</a></li>
         <li>Basemap layer: <a href="https://developers.arcgis.com/esri-leaflet/" target="_blank">Esri-Leaflet</a></li>
         <li>Icons: <a href="https://fontawesome.com/icons" target="_blank">Font Awesome</a></li>
     </ul>
 
-    <h5>Attributions</h5>
-    <ul class="attribution-list">
-        <li>USGS National Shoreline Change — A GIS compilation of vector shorelines and associated shoreline change data for coastal Virginia from the 1840s to 2010s <br><a href="https://www.sciencebase.gov/catalog/item/641b186fd34e4c337f0c1de3" target="_blank">https://www.sciencebase.gov/catalog/item/641b186fd34e4c337f0c1de3</a></li>
-        <li>USGS National Shoreline Change - A GIS compilation of new lidar-derived shorelines (2010, 2017, and 2018) and associated shoreline change data for coastal South Carolina <br><a href="https://www.sciencebase.gov/catalog/item/6480a887d34eac007b5793e9" target="_blank">https://www.sciencebase.gov/catalog/item/6480a887d34eac007b5793e9</a></li>
 
-    </ul>
 </div>
 </body>
 </html>

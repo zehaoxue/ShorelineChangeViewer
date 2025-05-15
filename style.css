@@ -298,7 +298,7 @@ header {
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #222;
+    background-color: #134362;
     padding-top: 60px;
 }
 
@@ -319,11 +319,30 @@ header {
     padding-left: 1.5rem;
     margin: 0.5rem;
     display: block;
-    color: #BBB;
+    color: #e0e0e0;
     font-size: 1.5rem;
     text-decoration: none;
 }
 
 .sidebar a:hover {
     color: white;
+}
+
+
+.graph-panel {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    width: 350px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    z-index: 999;
+}
+
+.graph-panel.hidden {
+    display: none;
 }
