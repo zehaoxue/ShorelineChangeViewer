@@ -23,8 +23,6 @@ header {
     z-index: 0;
 }
 
-
-/*Layer control menu and buttons*/
 .menuInfo {
     position: absolute;
     top: 75px;
@@ -33,7 +31,7 @@ header {
     background: rgba(255, 255, 255, 0.8);
     padding: 10px;
     display: flex;
-    flex-direction: column;  /* 🔑 Stack children vertically */
+    flex-direction: column;
     gap: 8px;
 }
 
@@ -43,8 +41,8 @@ header {
     border: 2px solid #333;
     background-color: white;
     border-radius: 4px;
-    font-size: Large;
-    font-weight:600;
+    font-size: large;
+    font-weight: 600;
     color: #333;
     display: flex;
     align-items: center;
@@ -72,13 +70,6 @@ header {
     pointer-events: none;
     background-color: inherit !important;
     color: inherit !important;
-}
-
-.leaflet-style-button-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: Large;
 }
 
 .custom-tooltip {
@@ -120,7 +111,7 @@ header {
     border-bottom: 1px solid #eee;
 }
 
-/*spinner for when loading json*/
+
 .loading-spinner {
     position: fixed;
     top: 50%;
@@ -144,13 +135,13 @@ header {
     animation: spin 1s linear infinite;
 }
 
-.hidden {
-    display: none !important;
-}
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none !important;
 }
 
 
@@ -187,23 +178,43 @@ header {
     box-sizing: border-box;
 }
 
-.info-page .container h1 {
-    margin-top: 0;
+.info-page .container h5 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
 }
-.info-page .container h2 {
-    margin-top: 8px;
-    margin-bottom: 8px;
+
+.info-page .container p {
+    margin-bottom: 1.25rem;
 }
-.info-page .container p,ul {
-    margin: 0;
+
+.info-page .container ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.25rem;
+}
+
+/* Layer Descriptions */
+.label-icons > button {
+    margin-top: 0.75rem;
+}
+
+.label-icons > div {
+    margin-bottom: 1.25rem;
+    margin-left: 1.5rem;
+}
+
+/* Icon Labels */
+.icon-labels {
+    margin-bottom: 1.5rem;
 }
 
 .icon-labels div {
     display: flex;
     align-items: center;
-    margin-top: 0.5rem;
-    margin-left: 9px;
+    margin-bottom: 0.5rem;
+    margin-left: 0.25rem;
 }
+
 .icon-labels i {
     min-width: 2rem;
     min-height: 2rem;
@@ -220,8 +231,6 @@ header {
     line-height: 1.3;
 }
 
-
-/*modal display for info page*/
 .modal-background {
     position: fixed;
     top: 0;
@@ -240,6 +249,9 @@ header {
     max-width: 900px;
     width: 80%;
     height: 80vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-close {
@@ -257,8 +269,7 @@ header {
     overflow: auto;
 }
 
-
-/*for sidebar menu*/
+/* Sidebar Menu */
 .openbtn {
     width: 2rem;
     height: 2rem;
@@ -267,6 +278,7 @@ header {
     justify-content: center;
     align-items: center;
 }
+
 .openbtn:hover {
     background-color: #444;
 }
@@ -281,7 +293,7 @@ header {
 .sidebar {
     width: 0;
     overflow-x: hidden;
-    transition: .5s;
+    transition: 0.5s;
     height: 100%;
     position: fixed;
     top: 0;
@@ -293,12 +305,14 @@ header {
 .sidebar.open {
     width: 250px;
 }
+
 .shifted {
     margin-left: 250px;
 }
 
-#main, #menuInfo {
-    transition: .5s;
+#main,
+#menuInfo {
+    transition: 0.5s;
 }
 
 .sidebar a {
@@ -309,10 +323,7 @@ header {
     font-size: 1.5rem;
     text-decoration: none;
 }
+
 .sidebar a:hover {
     color: white;
 }
-
-
-
-

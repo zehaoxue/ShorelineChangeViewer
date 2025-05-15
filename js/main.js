@@ -46,9 +46,12 @@ const UI = {
     },
 
     hasSeenModal() {
-        return document.cookie.split(';').some(cookie =>
-            cookie.trim().startsWith("infoModalShown=true")
-        );
+    let cookies = document.cookie.split(';');
+        for (let cookie of cookies){
+            if(cookie.trim().startsWith("infoModalShown=true")) {
+                return true;
+            }
+        }
     },
 
     closeInfoModal() {
@@ -59,6 +62,8 @@ const UI = {
     openInfoModal() {
         document.getElementById('infoModal').style.display = 'flex';
     },
+
+
 
     showSpinner() {
         document.getElementById("loadingSpinner").classList.remove("hidden");
@@ -203,11 +208,10 @@ function initializeMap(mapId) {
     infoButton.addTo(map);
 
     function fullExtent() {
-        //slightly different action if full extent is pressed
         if (featureGroup.getLayers().length) {
             map.fitBounds(featureGroup.getBounds());
         } else {
-            map.setView([38.1863, -74.8773], 7);
+            map.setView(default_view.center, default_view.zoom);
         }
     }
 
@@ -276,6 +280,10 @@ function initializeMap(mapId) {
         div.id = 'mapLegend';
         return div;
     };
+
+    if (!UI.hasSeenModal()) {
+        document.getElementById('infoModal').style.display = 'flex';
+    }
 
     legendControl.addTo(map);
     featureGroup.addTo(map);
@@ -431,6 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return bins[bins.length - 1]?.color || '#999'; // fallback to last color if needed
     }
 
+    //update legend
     function updateLegend() {
         const legend = document.getElementById('mapLegend');
         if (!legend) return;
@@ -462,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //call it immediately to generate the empty text
     updateLegend()
 
-
+    //update url params on move
     map.on('moveend', function () {
         UrlParams.update(map);
     });
