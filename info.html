@@ -15,52 +15,49 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-    <!-- Load Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Load Esri-Leaflet -->
-    <script src="https://unpkg.com/esri-leaflet@3.0.14/dist/esri-leaflet.js"></script>
-    <script src="https://unpkg.com/esri-leaflet-vector@4.2.8/dist/esri-leaflet-vector.js"></script>
-
-    <script src="./resources/javascripts/Leaflet.MakiMarkers.js"></script>
-    <script src="./resources/javascripts/utility.js"></script>
-
-
-    <!-- leaflet plugin for adding location service and button -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.84.1/dist/L.Control.Locate.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.84.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
 
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body class="info-page">
 <div class="container">
-    <h1>Texas Heritage Trails Map</h1>
-    <p>
-        This interactive map shows the <strong>Texas Heritage Trails</strong> for each <strong>Texas Historical Commission Regions</strong>, along with locations for <strong>breweries, wineries, and BBQ stands</strong>.
+    <h2 class="mb-2 ">National Shoreline Change Viewer</h2>
+    <p class="mb-2 ">
+        Coastal erosion is a major concern for both natural and developed shorelines across the United States, affecting habitats, infrastructure, and entire communities. To support better decision-making and risk planning, the U.S. Geological Survey (USGS) conducts nationwide analysis of shoreline changes and provides tools to understand past and future coastal dynamics. This lightweight web application simplifies access to that data, offering an intuitive and efficient way for scientists, planners, and the public to explore shoreline change information.
     </p>
 
-    <h2>Map Controls Overview</h2>
+    <h5 class="mb-2 ">Layer Descriptions</h5>
 
-
-    <div class="icon-labels">
-        <div><i class="fas fa-2x fa-expand"></i> Full Extent: Zooms to all visible data</div>
-        <div><i class="fas fa-2x fa-map"></i> Regions: Shows THC Regions</div>
-        <div><i class="fas fa-2x fa-hiking"></i> Trails: Shows Texas Heritage Trails</div>
-        <div><i class="fas fa-2x fa-wine-bottle"></i> Wineries: Shows wineries</div>
-        <div><i class="fas fa-2x fa-beer"></i> Breweries: Shows breweries</div>
-        <div><i class="fas fa-2x fa-utensils"></i> BBQ: Shows BBQ stands</div>
-        <div><i class="fas fa-2x fa-location-arrow"></i> Location: Zooms to current location</div>
-        <div><i class="fas fa-2x fa-layer-group"></i> Basemaps: Toggles between basemap layers</div>
-        <div><i class="fas fa-2x fa-bars"></i> Menu: Opens menu containing additional options</div>
+    <div class="label-icons">
+        <button class="layer-button static-button">Long-term rates</button>
+        <div class="mb-3">Long-term (78+ years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1800's to 2018.</div>
+        <button class="layer-button static-button">Short-term rates</button>
+        <div class="mb-3">Short-term (~30 years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1970's to 2018.</div>
+        <button class="layer-button static-button">Historical shorelines</button>
+        <div class="mb-3">Historical shoreline positions for ocean shorelines of the United States ranging from 1800's to present.</div>
     </div>
 
-    <h2>Attributions & Data Sources</h2>
+    <h5>Map Controls Overview</h5>
+
+    <div class="icon-labels">
+        <div><i class="fas fa-expand text-dark"></i> Location: Zooms to current location</div>
+        <div><i class="fas fa-eraser text-dark"></i> Basemaps: Toggles between basemap layers</div>
+        <div><i class="fas fa-table text-dark"></i> Menu: Opens menu containing additional options</div>
+        <div><i class="fas fa-question-circle text-dark"></i> Menu: Opens menu containing additional options</div>
+
+    </div>
+
+    <h5>Data Sources</h5>
     <ul class="attribution-list">
         <li>Mapping library: <a href="https://leafletjs.com" target="_blank">Leaflet</a></li>
-        <li>Basemaps layers: <a href="https://developers.arcgis.com/esri-leaflet/" target="_blank">Esri-Leaflet</a></li>
-        <li>User location control: <a href="https://github.com/domoritz/leaflet-locatecontrol" target="_blank">Leaflet LocateControl</a></li>
-        <li>GeoJSON Vector Tiling<a href="https://github.com/iamtekson/leaflet-geojson-vt" target="_blank">leaflet-geojson-vt</a></li>
+        <li>Basemap layer: <a href="https://developers.arcgis.com/esri-leaflet/" target="_blank">Esri-Leaflet</a></li>
+        <li>Icons: <a href="https://fontawesome.com/icons" target="_blank">Font Awesome</a></li>
+    </ul>
+
+    <h5>Attributions</h5>
+    <ul class="attribution-list">
+        <li>USGS National Shoreline Change — A GIS compilation of vector shorelines and associated shoreline change data for coastal Virginia from the 1840s to 2010s <br><a href="https://www.sciencebase.gov/catalog/item/641b186fd34e4c337f0c1de3" target="_blank">https://www.sciencebase.gov/catalog/item/641b186fd34e4c337f0c1de3</a></li>
+        <li>USGS National Shoreline Change - A GIS compilation of new lidar-derived shorelines (2010, 2017, and 2018) and associated shoreline change data for coastal South Carolina <br><a href="https://www.sciencebase.gov/catalog/item/6480a887d34eac007b5793e9" target="_blank">https://www.sciencebase.gov/catalog/item/6480a887d34eac007b5793e9</a></li>
+
     </ul>
 </div>
 </body>

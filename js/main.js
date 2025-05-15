@@ -2,9 +2,32 @@
 const esriToken = 'AAPTxy8BH1VEsoebNVZXo8HurFPAvfahFkXkFo1XVG-bfLoSsiEyvnpLZZZptCEuCC7nq5xa8uc0BzBjfVdId2UfyCK7nm7JyHvBPHBGKhRGhZY5WKUTFFouDxq0flT9prWX4Zw_Fmji1pr9xgj8S3BG8yF5amuJnKLBf0tP-Iif1WHmz3dsAu-fvYMJ0NRg0tnuJXP4hEy2q9NOo1c0Dcx87yfXVsxos7kM6YcfiUKEyjEk33wm-BC6OOnLAui3uo1EAT1_GrM97IOj'
 const baseURL = 'http://44.225.111.109/DATA/shoreline_data/';
 let default_view = {
-    center: [38.1863, -74.8773],
+    center: [35.10643, -78.06335],
     zoom: 7
 };
+const buttonList = ["ratesLT", "ratesST", "shorelines"]; //used for sorting, basically the data types
+
+const colorBins = {
+    rates: [
+        { threshold: -2, label: '≤ -2', color: '#b35806' },
+        { threshold: -1, label: '-2 to -1', color: '#f1a340' },
+        { threshold:  0, label: '-1 to 0',  color: '#fee0b6' },
+        { threshold:  1, label: '0 to 1',   color: '#d8daeb' },
+        { threshold:  2, label: '1 to 2',   color: '#998ec3' },
+        { threshold:  Infinity, label: '> 2', color: '#542788' }
+    ],
+    shorelines: [
+        { threshold: 1950, label: '< 1950',     color: '#1f77b4' },
+        { threshold: 1970, label: '1950–1970',  color: '#2ca02c' },
+        { threshold: 1990, label: '1970–1990',  color: '#ff7f0e' },
+        { threshold: 2010, label: '1990–2010',  color: '#d62728' },
+        { threshold: Infinity, label: '> 2010', color: '#9467bd' }
+    ]
+};
+
+let layersList = {};
+let activeButtonSet = new Set;
+let featureGroup = new L.FeatureGroup();
 
 //UI functions
 const UI = {
@@ -70,11 +93,10 @@ const UrlParams = {
         const params = new URLSearchParams(window.location.search);
         const layers = params.get('layers');
         const result = layers ? layers.split(",") : [];
-        console.log(result);
         return result;
     },
 
-    update(map, activeButtonSet) {
+    update(map) {
         const center = map.getCenter();
         const zoom = map.getZoom();
 
@@ -107,28 +129,13 @@ function initializeMap(mapId) {
         zoom: zoom
     });
 
-    //add basemaps
+    //add basemap
     const esriTopoVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/topographic', {
         token: esriToken,
         worldview: "unitedStatesOfAmerica"
     });
-    const esriLightGrayVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/light-gray', {
-        token: esriToken,
-        worldview: "unitedStatesOfAmerica"
-    });
-    const esriImageryBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/imagery', {
-        token: esriToken,
-        worldview: "unitedStatesOfAmerica"
-    });
-
-    const basemaps = {
-        "Topographic": esriTopoVectorBasemap,
-        "Light Gray": esriLightGrayVectorBasemap,
-        "Imagery": esriImageryBasemap
-    };
 
     map.addLayer(esriTopoVectorBasemap);
-    L.control.layers(basemaps).addTo(map);
 
     L.control.zoom({
         position: 'bottomright'
@@ -191,7 +198,7 @@ function initializeMap(mapId) {
         position: 'bottomleft',
         title: 'More Information',
         iconHTML: '<i class="fas fa-question-circle text-dark"></i>',
-        clickHandler: clearMap
+        clickHandler: UI.openInfoModal
     });
     infoButton.addTo(map);
 
@@ -212,7 +219,8 @@ function initializeMap(mapId) {
         fullExtent()
     }
 
-    const controls = document.querySelectorAll('.leaflet-control [title]');
+    const controls = document.querySelectorAll('.leaflet-control [title], #menuInfo [title]');
+
 
     controls.forEach(button => {
         let tooltip;
@@ -261,14 +269,19 @@ function initializeMap(mapId) {
         });
     });
 
+    const legendControl = L.control({ position: 'bottomleft' });
 
+    legendControl.onAdd = function () {
+        const div = L.DomUtil.create('div', 'info legend');
+        div.id = 'mapLegend';
+        return div;
+    };
+
+    legendControl.addTo(map);
+    featureGroup.addTo(map);
     return map;
 }
 
-let layersList = {};
-let activeButtonSet = new Set;
-let featureGroup = new L.FeatureGroup();
-featureGroup.addTo(map);
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -303,7 +316,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // }
 
     function layerButtonClicked(buttonId) {
-        console.log('Clicked button ID:', buttonId);
         let requestFolderURL = baseURL + buttonId + "/";
         loadGeoJSONFromDirectory(requestFolderURL, buttonId);
     }
@@ -333,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     featureGroup.removeLayer(layersList[fullURL]);
                     delete layersList[fullURL];
                     activeButtonSet.delete(buttonId);
-                    UrlParams.update(map);
+                    updateLegend();
                     $('#' + buttonId).removeClass('selected');
                 } else {
                     $('#' + buttonId).addClass('selected');
@@ -342,54 +354,113 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!geojsonResponse.ok) throw new Error("Failed to load" + fullURL + " : " + geojsonResponse.status);
 
                     const data = await geojsonResponse.json();
-                    processGeoJSONVectorTile(data, buttonId, fullURL);
+                    processGeoJSON(data, buttonId, fullURL);
                 }
             }
         } catch (error) {
             console.error(error);
             alert("Error loading GeoJSON data.");
         } finally {
+            UrlParams.update(map);
             UI.hideSpinner();
         }
     }
 
+    function processGeoJSON(data, buttonId, fullURL) {
+        const styleForLayer = getLayerStyle(buttonId);
 
-    function processGeoJSONVectorTile(data, buttonId, fullURL) {
-        let vtLayer = L.geoJSON(data, {
+        const geoJsonLayer = L.geoJSON(data, {
             style: function (feature) {
-                // This style is applied to LineString and Polygon geometries
-                return {
-                    color: 'blue',        // border color
-                    weight: 2,            // border thickness
-                    opacity: 0.8,         // border opacity
-                    fillColor: 'cyan',    // fill color (for polygons)
-                    fillOpacity: 0.3      // fill opacity (for polygons)
-                };
-            },
-            pointToLayer: function (feature, latlng) {
-                // This is used for Point geometries
-                return L.circleMarker(latlng, {
-                    radius: 6,
-                    fillColor: 'red',
-                    color: 'black',
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                });
+                // LineString and Polygon style
+                return styleForLayer(feature);
             }
         }).bindPopup(layer => {
             const props = layer.feature.properties;
-            return Object.entries(props).map(([k, v]) => `<strong>${k}:</strong> ${v}`).join("<br>");
+            return Object.entries(props)
+                .map(([k, v]) => `<strong>${k}:</strong> ${v}`)
+                .join("<br>");
         });
 
-
-        featureGroup.addLayer(vtLayer);
-        layersList[fullURL] = vtLayer;
+        featureGroup.addLayer(geoJsonLayer);
+        layersList[fullURL] = geoJsonLayer;
         activeButtonSet.add(buttonId);
         UrlParams.update(map);
-        console.log(activeButtonSet)
+        updateLegend();
     }
 
+    // Style logic
+    function getLayerStyle(buttonId) {
+
+        if (buttonId === 'shorelines') {
+            return feature => {
+                const year = parseInt(feature?.properties?.Year_, 10);
+                return {
+                    color: getBinnedColor(year, colorBins.shorelines),
+                    weight: getLineWeight(map.getZoom()),
+                    opacity: 0.8
+                };
+            };
+        }
+
+        if (buttonId === 'ratesLT' || buttonId === 'ratesST') {
+            return feature => {
+                const field = buttonId === 'ratesLT' ? 'LRR' : 'EPR';
+                const value = parseFloat(feature?.properties?.[field]);
+                return {
+                    color: getBinnedColor(value, colorBins.rates),
+                    weight: getLineWeight(map.getZoom()),
+                    opacity: 0.9
+                };
+            };
+        }
+
+        return () => styles[buttonId] || { color: 'gray', weight: 2, opacity: 0.8 };
+    }
+
+    //
+    function getLineWeight(zoom) {
+        return Math.log2(zoom);
+        // return Math.max(1, Math.log2(zoom));
+    }
+
+    function getBinnedColor(value, bins) {
+        if (isNaN(value)) return '#999';
+        for (const bin of bins) {
+            if (value < bin.threshold) return bin.color;
+        }
+        return bins[bins.length - 1]?.color || '#999'; // fallback to last color if needed
+    }
+
+    function updateLegend() {
+        const legend = document.getElementById('mapLegend');
+        if (!legend) return;
+        legend.innerHTML = '';
+
+        buttonList.forEach(buttonId => {
+            if (!activeButtonSet.has(buttonId)) return;
+
+            if (buttonId === 'ratesLT' || buttonId === 'ratesST') {
+                const label = buttonId === 'ratesLT' ? 'Long-term Rates<br>(m/year)' : 'Short-term Rates<br>(m/year)';
+                legend.innerHTML += `<strong>${label}</strong><br>`;
+                colorBins.rates.forEach(bin => {
+                    legend.innerHTML += `<i style="background:${bin.color}"></i> ${bin.label}<br>`;
+                });
+            }
+
+            if (buttonId === 'shorelines') {
+                legend.innerHTML += `<strong>Shoreline Years</strong><br>`;
+                colorBins.shorelines.forEach(bin => {
+                    legend.innerHTML += `<i style="background:${bin.color}"></i> ${bin.label}<br>`;
+                });
+            }
+        });
+
+        if (legend.innerHTML === '') {
+            legend.innerHTML = '<em>No layer selected</em>';
+        }
+    }
+    //call it immediately to generate the empty text
+    updateLegend()
 
 
     map.on('moveend', function () {

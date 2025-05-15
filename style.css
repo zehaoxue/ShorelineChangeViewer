@@ -67,6 +67,13 @@ header {
     transform: scale(0.95);
 }
 
+.static-button {
+    transform: none !important;
+    pointer-events: none;
+    background-color: inherit !important;
+    color: inherit !important;
+}
+
 .leaflet-style-button-inner {
     display: flex;
     align-items: center;
@@ -80,9 +87,11 @@ header {
     color: #fff;
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 14px;
     pointer-events: none;
-    white-space: nowrap;
+    white-space: normal;
+    max-width: 240px;
+    word-wrap: break-word;
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.15s ease;
@@ -142,6 +151,26 @@ header {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+
+.info.legend {
+    background: white;
+    padding: 8px 12px;
+    font: 14px/1.4 "Helvetica Neue", Arial, sans-serif;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    line-height: 1.5em;
+}
+
+.info.legend i {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    background: #ccc;
+    border-radius: 3px;
 }
 
 
