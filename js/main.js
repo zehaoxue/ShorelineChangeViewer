@@ -5,7 +5,22 @@ let default_view = {
     center: [37.87485, -99.09668],
     zoom: 5
 };
-const buttonList = ["ratesLT", "ratesST", "shorelines"]; //used for sorting, basically the data types
+let buttonList = ["ratesST", "ratesLT", "shorelines"];
+
+const buttonInfo = {
+    ratesST: {
+        label: "Short-term rates",
+        title: "Short-term (~30 years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1970's to 2018."
+    },
+    ratesLT: {
+        label: "Long-term rates",
+        title: "Long-term (78+ years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1800's to 2018."
+    },
+    shorelines: {
+        label: "Historical shorelines",
+        title: "Historical shoreline positions for ocean shorelines of the United States ranging from 1800's to present."
+    }
+};
 
 const colorBins = {
     rates: [
@@ -73,47 +88,61 @@ const UI = {
     },
 
 
+    legend: {
 
-    //update legend
-    updateLegend() {
-        const legend = document.getElementById('mapLegend');
-        if (!legend) return;
-        legend.innerHTML = ''; // Clear any existing legend content
+        create() {
+            const legendControl = L.control({ position: 'bottomleft' });
 
-        // Loop through all buttons to see which ones are active, this is for sorting instead of using the buttonSet
-        buttonList.forEach(buttonId => {
-            if (!activeButtonSet.has(buttonId)) return; //skip if not active
+            legendControl.onAdd = function () {
+                const div = L.DomUtil.create('div', 'info legend');
+                div.id = 'mapLegend';
+                return div;
+            };
 
-            // Handle shoreline change rate layers
-            if (buttonId === 'ratesLT' || buttonId === 'ratesST') {
-                // Choose label based on which rate button is active
-                const label = buttonId === 'ratesLT'
-                    ? 'Long-term Rates<br>(m/year)'
-                    : 'Short-term Rates<br>(m/year)';
+            return legendControl;
+        },
 
-                legend.innerHTML += `<strong>${label}</strong><br>`;
+        //update legend
+        update() {
+            const legend = document.getElementById('mapLegend');
+            if (!legend) return;
+            legend.innerHTML = ''; // Clear any existing legend content
 
-                //Add colors bins for rates
-                colorBins.rates.forEach(bin => {
-                    legend.innerHTML += `<i style="background:${bin.color}"></i> ${bin.label}<br>`;
-                });
+            // Loop through all buttons to see which ones are active, this is for sorting instead of using the buttonSet
+            buttonList.forEach(buttonId => {
+                if (!activeButtonSet.has(buttonId)) return; //skip if not active
+
+                // Handle shoreline change rate layers
+                if (buttonId === 'ratesLT' || buttonId === 'ratesST') {
+                    // Choose label based on which rate button is active
+                    const label = buttonId === 'ratesLT'
+                        ? 'Long-term Rates<br>(m/year)'
+                        : 'Short-term Rates<br>(m/year)';
+
+                    legend.innerHTML += `<strong>${label}</strong><br>`;
+
+                    //Add colors bins for rates
+                    colorBins.rates.forEach(bin => {
+                        legend.innerHTML += `<i style="background:${bin.color}"></i> ${bin.label}<br>`;
+                    });
+                }
+
+                //Handle shoreline layers
+                if (buttonId === 'shorelines') {
+                    legend.innerHTML += `<strong>Historical Shorelines<br>(years)</strong><br>`;
+
+                    //Add color bins for shoreline
+                    colorBins.shorelines.forEach(bin => {
+                        legend.innerHTML += `<i style="background:${bin.color}"></i> ${bin.label}<br>`;
+                    });
+                }
+            });
+
+            //if no layers selected
+            if (legend.innerHTML === '') {
+                legend.innerHTML = '<em>No layer selected</em>';
             }
-
-            //Handle shoreline layers
-            if (buttonId === 'shorelines') {
-                legend.innerHTML += `<strong>Shoreline Years</strong><br>`;
-
-                //Add color bins for shoreline
-                colorBins.shorelines.forEach(bin => {
-                    legend.innerHTML += `<i style="background:${bin.color}"></i> ${bin.label}<br>`;
-                });
-            }
-        });
-
-        //if no layers selected
-        if (legend.innerHTML === '') {
-            legend.innerHTML = '<em>No layer selected</em>';
-        }
+        },
     },
 
     createLeafletButton(options) {
@@ -155,6 +184,68 @@ const UI = {
         close() {
             document.getElementById('graphPanel').classList.add('hidden');
         },
+    },
+
+    attachCustomTooltips(selector = '.leaflet-control [title], #menuInfo [title]') {
+        const controls = document.querySelectorAll(selector);
+
+        controls.forEach(button => {
+            let tooltip;
+
+            button.addEventListener('mouseenter', () => {
+                const title = button.getAttribute('title');
+                if (!title) return;
+
+                button.dataset.title = title;
+                button.removeAttribute('title');
+
+                tooltip = document.createElement('div');
+                tooltip.className = 'custom-tooltip';
+                tooltip.innerText = title;
+                document.body.appendChild(tooltip);
+
+                requestAnimationFrame(() => {
+                    if (!tooltip) return;
+
+                    const rect = button.getBoundingClientRect();
+                    const tooltipRect = tooltip.getBoundingClientRect();
+
+                    let left = rect.left - tooltipRect.width - 6;
+                    if (left < 0) left = rect.right + 6;
+
+                    tooltip.style.left = `${left}px`;
+                    tooltip.style.top = `${rect.top + window.scrollY + (rect.height - tooltipRect.height) / 2}px`;
+                    tooltip.style.opacity = '1';
+                });
+            });
+
+            button.addEventListener('mouseleave', () => {
+                if (tooltip) {
+                    tooltip.remove();
+                    tooltip = null;
+                }
+
+                if (button.dataset.title) {
+                    button.setAttribute('title', button.dataset.title);
+                    delete button.dataset.title;
+                }
+            });
+        });
+    },
+    generateLayerButtons() {
+        const menuInfo = document.getElementById('menuInfo');
+        menuInfo.innerHTML = ''; // clear existing
+
+        buttonList.forEach(id => {
+            const btn = document.createElement('button');
+            btn.className = 'layer-button';
+            btn.id = id;
+            btn.type = 'button';
+            btn.title = buttonInfo[id].title;
+            btn.textContent = buttonInfo[id].label;
+
+            menuInfo.appendChild(btn);
+        });
     }
 
 
@@ -177,6 +268,20 @@ const mapUtils = {
         mapUtils.fullExtent()
     },
 
+    redrawLayersByButtonList() {
+        featureGroup.clearLayers();
+        // Reverse the order of buttonList for drawing
+        [...buttonList].reverse().forEach(buttonId => {
+            Object.entries(layersList).forEach(([url, layer]) => {
+                if (activeButtonSet.has(buttonId) && url.includes(`/${buttonId}/`)) {
+                    featureGroup.addLayer(layer);
+                }
+            });
+        });
+    },
+
+
+
     updateExtentServices(){
         if (!document.getElementById('graphPanel').classList.contains('hidden')) {
             drawHistogram();
@@ -185,7 +290,7 @@ const mapUtils = {
     },
 
     updateAllServices(){
-        UI.updateLegend()
+        UI.legend.update()
         if (!document.getElementById('graphPanel').classList.contains('hidden')) {
             drawHistogram();
         }
@@ -246,8 +351,6 @@ const UrlParams = {
 };
 
 
-
-
 const map = initializeMap("mapId");
 
 function initializeMap(mapId) {
@@ -300,81 +403,35 @@ function initializeMap(mapId) {
     }).addTo(map);
 
 
-    //grab all controls needing tooltips
-    const controls = document.querySelectorAll('.leaflet-control [title], #menuInfo [title]');
+    //draw layer buttons
+    UI.generateLayerButtons();
 
-    controls.forEach(button => {
-        let tooltip;
-
-        button.addEventListener('mouseenter', () => {
-            const title = button.getAttribute('title');
-            if (!title) return;
-
-            // Prevent default browser tooltip
-            button.dataset.title = title;
-            button.removeAttribute('title');
-
-            tooltip = document.createElement('div');
-            tooltip.className = 'custom-tooltip';
-            tooltip.innerText = title;
-            document.body.appendChild(tooltip);
-
-            // Wait for tooltip to render before measuring
-            requestAnimationFrame(() => {
-                if (!tooltip) return;
-
-                const rect = button.getBoundingClientRect();
-                const tooltipRect = tooltip.getBoundingClientRect();
-
-                let left = rect.left - tooltipRect.width - 6;
-                if (left < 0) {
-                    left = rect.right + 6;
-                }
-
-                tooltip.style.left = `${left}px`;
-                tooltip.style.top = `${rect.top + window.scrollY + (rect.height - tooltipRect.height) / 2}px`;
-                tooltip.style.opacity = '1';
-            });
-
-        });
-
-        button.addEventListener('mouseleave', () => {
-            if (tooltip) {
-                tooltip.remove();
-                tooltip = null;
-            }
-
-            // Restore the original title
-            if (button.dataset.title) {
-                button.setAttribute('title', button.dataset.title);
-                delete button.dataset.title;
-            }
-        });
-    });
-
-    const legendControl = L.control({position: 'bottomleft'});
-
-    legendControl.onAdd = function () {
-        const div = L.DomUtil.create('div', 'info legend');
-        div.id = 'mapLegend';
-        return div;
-    };
-    legendControl.addTo(map);
+    //draw legend
+    UI.legend.create().addTo(map);
 
     //draw modal on map init if not already seen
     if (!UI.infoModal.hasSeen()) {
         document.getElementById('infoModal').style.display = 'flex';
     }
 
+    //make all custom tooltips for icon buttons and layer buttons
+    UI.attachCustomTooltips();
+
     featureGroup.addTo(map);
     return map;
 }
 
-
-
-
-
-
+const sortable = Sortable.create(document.getElementById('menuInfo'), {
+    animation: 150,
+    onEnd: function (evt) {
+        // Update buttonList based on new order
+        const newOrder = Array.from(evt.to.children).map(btn => btn.id);
+        buttonList = newOrder;
+        console.log("Updated buttonList:", buttonList);
+        mapUtils.redrawLayersByButtonList()
+        mapUtils.updateAllServices()
+    }
+});
 
 function drawHistogram() {
     const container = document.getElementById('chartContainer');
@@ -487,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 
     //generate the empty text in legend in start
-    UI.updateLegend()
+    UI.legend.update()
 
     // functionality for sidebar
     $('.menu-button').on('click', function () {
@@ -567,8 +624,8 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error(error);
             alert("Error loading GeoJSON data.");
         } finally {
-            //runs on both success and fails
-            //writes active layer groups to url and finish spinning spinner
+            mapUtils.redrawLayersByButtonList();
+            mapUtils.updateAllServices();
             UI.spinner.hideSpinner();
         }
     }
@@ -632,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return () => styles[buttonId] || {color: 'gray', weight: 2, opacity: 0.8};
     }
 
-    //some weird math for line weight, originally tried zoom*0.5 but that wasn't great
+    //some weird math for line weight, zoom*0.5 didn't work
     function getLineWeight(zoom) {
         return Math.max(1, Math.log2(zoom));
     }
@@ -644,8 +701,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return bins[bins.length - 1]?.color || '#999';
     }
-
-
 
 
     //update url params on move

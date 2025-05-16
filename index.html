@@ -31,7 +31,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.84.1/dist/L.Control.Locate.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.84.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
 
+
+    <!-- dynamically generated graphs in js    -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!--  sort lists  -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
     <link rel="stylesheet" href="style.css"/>
     <script>
@@ -67,9 +72,7 @@
         <div id="mapId"></div>
     </div>
     <div id= "menuInfo" class="menuInfo">
-        <button class="layer-button" id="ratesLT" type="button" title="Long-term (78+ years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1800's to 2018.">Long-term rates</button>
-        <button class="layer-button" id="ratesST" type="button" title="Short-term (~30 years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1970's to 2018.">Short-term rates</button>
-        <button class="layer-button" id="shorelines" type="button" title="Historical shoreline positions for ocean shorelines of the United States ranging from 1800's to present.">Historical shorelines</button>
+    <!--        generated buttons go here-->
     </div>
 
     <div id="loadingSpinner" class="loading-spinner hidden" title="Loading...">
@@ -78,7 +81,7 @@
 
     <div id="graphPanel" class="graph-panel hidden">
         <button onclick="UI.graphPanel.close()" style="float:right;">✕</button>
-<!--        <h3>Histogram of Visible Data</h3>-->
+    <!--        <h3>Histogram of Visible Data</h3>-->
         <div id="chartContainer"></div>
     </div>
 
