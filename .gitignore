@@ -1,3 +1,7 @@
 /js/config.js
 /vendor/
 /.idea/
+
+# Data is served from S3; keep the local copies out of git
+/data/
+*.geojson
