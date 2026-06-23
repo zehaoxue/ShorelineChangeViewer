@@ -36,6 +36,10 @@ header {
 }
 
 .layer-button {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
     height: 48px;
     padding: 0 12px;
     border: 2px solid #333;
@@ -44,9 +48,6 @@ header {
     font-size: large;
     font-weight: 600;
     color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     box-sizing: border-box;
     white-space: nowrap;
 }
@@ -63,6 +64,26 @@ header {
 .layer-button:active {
     background-color: lightblue;
     transform: scale(0.95);
+}
+
+.drag-handle {
+    cursor: grab;
+    margin-right: 8px;
+    font-size: 1.2rem;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.button-label {
+    flex: 1;
+    pointer-events: none;
 }
 
 .static-button {
@@ -315,6 +336,18 @@ header {
     transition: 0.5s;
 }
 
+.menuInfo .sortable-ghost {
+    opacity: 0.4;
+    transform: scale(0.98);
+    background-color: #ddd !important;
+    border-style: dashed !important;
+    box-shadow: none !important;
+}
+
+body.dragging .custom-tooltip {
+    display: none !important;
+}
+
 .sidebar a {
     padding-left: 1.5rem;
     margin: 0.5rem;
@@ -346,3 +379,4 @@ header {
 .graph-panel.hidden {
     display: none;
 }
+

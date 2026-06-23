@@ -1,26 +1,28 @@
 //config
-const esriToken = 'AAPTxy8BH1VEsoebNVZXo8HurFPAvfahFkXkFo1XVG-bfLoSsiEyvnpLZZZptCEuCC7nq5xa8uc0BzBjfVdId2UfyCK7nm7JyHvBPHBGKhRGhZY5WKUTFFouDxq0flT9prWX4Zw_Fmji1pr9xgj8S3BG8yF5amuJnKLBf0tP-Iif1WHmz3dsAu-fvYMJ0NRg0tnuJXP4hEy2q9NOo1c0Dcx87yfXVsxos7kM6YcfiUKEyjEk33wm-BC6OOnLAui3uo1EAT1_GrM97IOj'
-const baseURL = 'http://44.225.111.109/DATA/shoreline_data/';
-let default_view = {
+const DATA_BASE_URL = 'https://shoreline-change-viewer-data.s3.us-east-2.amazonaws.com/';
+
+let defaultView = {
     center: [37.87485, -99.09668],
     zoom: 5
 };
-let buttonList = ["ratesST", "ratesLT", "shorelines"];
 
+//metadata for layer information
 const buttonInfo = {
     ratesST: {
-        label: "Short-term rates",
-        title: "Short-term (~30 years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1970's to 2018."
+        buttonLabel: "Short-term rates",
+        tooltip: "Short-term (~30 years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1970's to 2018."
     },
     ratesLT: {
-        label: "Long-term rates",
-        title: "Long-term (78+ years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1800's to 2018."
+        buttonLabel: "Long-term rates",
+        tooltip: "Long-term (78+ years) rates of shoreline change for open-ocean shorelines of the United States ranging from 1800's to 2018."
     },
     shorelines: {
-        label: "Historical shorelines",
-        title: "Historical shoreline positions for ocean shorelines of the United States ranging from 1800's to present."
+        buttonLabel: "Historical shorelines",
+        tooltip: "Historical shoreline positions for ocean shorelines of the United States ranging from 1800's to present."
     }
 };
+//generate button list from keys
+let buttonList = Object.keys(buttonInfo);
 
 const colorBins = {
     rates: [
@@ -186,52 +188,129 @@ const UI = {
         },
     },
 
-    attachCustomTooltips(selector = '.leaflet-control [title], #menuInfo [title]') {
-        const controls = document.querySelectorAll(selector);
+    attachCustomTooltips() {
+        // Initial selector: find elements that still have a native title
+        const initSelector = '.leaflet-control [title], #menuInfo [title]';
+        // Live selector: after init, we use data-tooltip instead of title
+        const liveSelector = '.leaflet-control [data-tooltip], #menuInfo [data-tooltip]';
 
-        controls.forEach(button => {
-            let tooltip;
+        const controls = document.querySelectorAll(initSelector);
 
-            button.addEventListener('mouseenter', () => {
-                const title = button.getAttribute('title');
-                if (!title) return;
+        // Single tooltip element reused
+        let tooltip = document.createElement('div');
+        tooltip.className = 'custom-tooltip';
+        tooltip.style.position = 'absolute';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.opacity = '0';
+        tooltip.style.transition = 'opacity 120ms ease-out';
+        document.body.appendChild(tooltip);
 
-                button.dataset.title = title;
-                button.removeAttribute('title');
+        let currentTarget = null;
+        let showTimeout = null;
+        let hideTimeout = null;
 
-                tooltip = document.createElement('div');
-                tooltip.className = 'custom-tooltip';
-                tooltip.innerText = title;
-                document.body.appendChild(tooltip);
+        function clearTimers() {
+            if (showTimeout) {
+                clearTimeout(showTimeout);
+                showTimeout = null;
+            }
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+        }
 
-                requestAnimationFrame(() => {
-                    if (!tooltip) return;
+        function positionTooltip(target) {
+            const rect = target.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
 
-                    const rect = button.getBoundingClientRect();
-                    const tooltipRect = tooltip.getBoundingClientRect();
+            // Default: left side of control
+            let left = rect.left - tooltipRect.width - 6;
+            if (left < 0) {
+                // If off-screen, flip to right side
+                left = rect.right + 6;
+            }
 
-                    let left = rect.left - tooltipRect.width - 6;
-                    if (left < 0) left = rect.right + 6;
+            let top = rect.top + window.scrollY + (rect.height - tooltipRect.height) / 2;
 
-                    tooltip.style.left = `${left}px`;
-                    tooltip.style.top = `${rect.top + window.scrollY + (rect.height - tooltipRect.height) / 2}px`;
-                    tooltip.style.opacity = '1';
-                });
+            tooltip.style.left = `${left + window.scrollX}px`;
+            tooltip.style.top = `${top}px`;
+        }
+
+        function showTooltip(target) {
+            const text = target.dataset.tooltip;
+            if (!text) return;
+
+            tooltip.textContent = text;
+            tooltip.style.opacity = '0';
+
+            requestAnimationFrame(() => {
+                positionTooltip(target);
+                tooltip.style.opacity = '1';
             });
+        }
 
-            button.addEventListener('mouseleave', () => {
-                if (tooltip) {
-                    tooltip.remove();
-                    tooltip = null;
-                }
+        function hideTooltip() {
+            clearTimers();
+            currentTarget = null;
+            tooltip.style.opacity = '0';
+        }
 
-                if (button.dataset.title) {
-                    button.setAttribute('title', button.dataset.title);
-                    delete button.dataset.title;
-                }
-            });
+        // 1) On init, move native title into data-tooltip and keep aria-label
+        controls.forEach(el => {
+            const nativeTitle = el.getAttribute('title');
+            if (nativeTitle) {
+                el.dataset.tooltip = nativeTitle;
+                el.setAttribute('aria-label', nativeTitle);
+                el.removeAttribute('title'); // prevent native browser tooltip
+            }
+        });
+
+        // 2) Use event delegation (mouseover / mouseout) on *data-tooltip* elements
+        document.addEventListener('mouseover', e => {
+            const target = e.target.closest(liveSelector);
+            if (!target || !target.dataset.tooltip) return;
+
+            if (currentTarget === target) return;
+
+            clearTimers();
+            currentTarget = target;
+
+            showTimeout = setTimeout(() => {
+                showTooltip(target);
+            }, 100); // small delay
+        });
+
+        document.addEventListener('mouseout', e => {
+            const from = e.target.closest(liveSelector);
+            const to = e.relatedTarget && e.relatedTarget.closest(liveSelector);
+
+            // Moving within same element or between its children
+            if (from && to && from === to) return;
+
+            if (from && from === currentTarget) {
+                clearTimers();
+                hideTimeout = setTimeout(hideTooltip, 100);
+            }
+        });
+
+        // 3) Global “hide” events
+        ['mousedown', 'touchstart', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, hideTooltip, { passive: true });
+        });
+        window.addEventListener('resize', hideTooltip);
+
+        // 4) Hide on Escape
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                hideTooltip();
+            }
         });
     },
+
+
+
+
     generateLayerButtons() {
         const menuInfo = document.getElementById('menuInfo');
         menuInfo.innerHTML = ''; // clear existing
@@ -241,8 +320,12 @@ const UI = {
             btn.className = 'layer-button';
             btn.id = id;
             btn.type = 'button';
-            btn.title = buttonInfo[id].title;
-            btn.textContent = buttonInfo[id].label;
+            btn.title = buttonInfo[id].tooltip;
+            btn.textContent = buttonInfo[id].buttonLabel;
+            btn.innerHTML = `
+                <span class="drag-handle" title="Drag to reorder">&#x2630;</span>
+                <span class="button-label">${buttonInfo[id].buttonLabel}</span>
+            `;
 
             menuInfo.appendChild(btn);
         });
@@ -256,7 +339,7 @@ const mapUtils = {
         if (featureGroup.getLayers().length) {
             map.fitBounds(featureGroup.getBounds());
         } else {
-            map.setView(default_view.center, default_view.zoom);
+            map.setView(defaultView.center, defaultView.zoom);
         }
     },
     clearMap() {
@@ -279,7 +362,6 @@ const mapUtils = {
             });
         });
     },
-
 
 
     updateExtentServices(){
@@ -316,7 +398,7 @@ const UrlParams = {
         ) {
             return {center: [lat, lng], zoom};
         }
-        return default_view;
+        return defaultView;
     },
 
     getActiveLayerIds() {
@@ -364,10 +446,9 @@ function initializeMap(mapId) {
         zoom: zoom
     });
 
-    //add basemap
-    const esriTopoVectorBasemap = L.esri.Vector.vectorBasemapLayer('arcgis/topographic', {
-        token: esriToken,
-        worldview: "unitedStatesOfAmerica"
+    var USGS_USTopo = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16,
+        attribution: '<a href="https://usgs.gov/">U.S. Geological Survey</a>'
     }).addTo(map);
 
     //add control buttons
@@ -423,13 +504,12 @@ function initializeMap(mapId) {
 
 const sortable = Sortable.create(document.getElementById('menuInfo'), {
     animation: 150,
+    handle: '.drag-handle', // <-- Only allow drag from the handle
     onEnd: function (evt) {
-        // Update buttonList based on new order
         const newOrder = Array.from(evt.to.children).map(btn => btn.id);
         buttonList = newOrder;
-        console.log("Updated buttonList:", buttonList);
-        mapUtils.redrawLayersByButtonList()
-        mapUtils.updateAllServices()
+        mapUtils.redrawLayersByButtonList();
+        mapUtils.updateAllServices();
     }
 });
 
@@ -569,38 +649,41 @@ document.addEventListener('DOMContentLoaded', function () {
     $('.layer-button').on('click', function () {
         layerButtonClicked(this.id);
     });
-    function layerButtonClicked(buttonId) {
-        let requestFolderURL = baseURL + buttonId + "/";
-        loadGeoJSONFromDirectory(requestFolderURL, buttonId);
+
+    function buildFolderURLs(DATA_BASE_URL, folderName) {
+        if (!folderName.endsWith("/")) folderName += "/";
+
+        return `${DATA_BASE_URL}?list-type=2&prefix=${folderName}`
     }
 
+    function layerButtonClicked(buttonId) {
+        const xmlURL = buildFolderURLs(DATA_BASE_URL, buttonId);
+        loadGeoJSONFromS3(xmlURL, buttonId);
+    }
 
     //big function for loading json
-    async function loadGeoJSONFromDirectory(requestFolderURL, buttonId) {
+    async function loadGeoJSONFromS3(xmlURL, buttonId) {
         // Show spinner before loading
         UI.spinner.showSpinner();
         try {
-            //grab directory
-            const response = await fetch(requestFolderURL);
-            if (!response.ok) throw new Error("Failed to load directory HTML:" + response.status);
+            //grab directory listing (XML from S3)
+            const response = await fetch(xmlURL);
+            if (!response.ok) throw new Error("Failed to load S3 XML listing: " + response.status);
 
-            //parse links from html
-            const htmlText = await response.text();
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(htmlText, "text/html");
-            const nodeList = htmlDoc.querySelectorAll("a");
-            const links = Array.from(nodeList);
+            //parse xml
+            const xmlText = await response.text();
+            const xmlDoc = new DOMParser().parseFromString(xmlText, "application/xml");
 
-            //get geojson files from links
-            const geojsonFiles = links
-                .map(link => link.getAttribute("href"))
-                .filter(href => href && href.toLowerCase().endsWith(".geojson"))
-                .map(href => href.split("/").pop());
+            //get geojson files from keys
+            const keys = Array.from(xmlDoc.getElementsByTagName("Key"))
+                .map(node => node.textContent)
+                .filter(key => key.toLowerCase().endsWith(".geojson"));
 
-            //loop through geojson in folder (this might be a problem later on if there is more, but theoretically there
-            // shouldn't be more than like 30? this is a TODO for later
-            for (const fileName of geojsonFiles) {
-                const fullURL = requestFolderURL + fileName;
+            console.log(keys)
+            //loop through geojson in folder
+            for (const key of keys) {
+                // build the actual file URL the same way as before:
+                const fullURL = `${DATA_BASE_URL}${key}`;
 
                 //if layer is already on, turn it off, remove from trackers
                 if (fullURL in layersList) {
@@ -613,13 +696,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     $('#' + buttonId).addClass('selected');
 
                     const geojsonResponse = await fetch(fullURL);
-                    if (!geojsonResponse.ok) throw new Error("Failed to load" + fullURL + " : " + geojsonResponse.status);
+                    if (!geojsonResponse.ok) {
+                        throw new Error("Failed to load " + fullURL + " : " + geojsonResponse.status);
+                    }
 
                     const data = await geojsonResponse.json();
                     processGeoJSON(data, buttonId, fullURL);
                 }
             }
+
             mapUtils.updateAllServices();
+
         } catch (error) {
             console.error(error);
             alert("Error loading GeoJSON data.");
@@ -630,6 +717,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    
 
     function processGeoJSON(data, buttonId, fullURL) {
         const styleForLayer = getLayerStyle(buttonId);
